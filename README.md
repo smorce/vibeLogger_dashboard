@@ -58,7 +58,7 @@ graph TD
 
 ```bash
 # 1. リポジトリを取得
-$ git clone https://github.com/your-org/vibeLogger_dashboard.git
+$ git clone https://github.com/smorce/vibeLogger_dashboard.git
 $ cd vibeLogger_dashboard
 
 # 2. 依存関係をインストール
