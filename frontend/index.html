@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VibeLogger Dashboard</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctitle%3EVibeLogger%20Dashboard%3C%2Ftitle%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2245%22%20fill%3D%22%23374151%22%2F%3E%3Cpath%20d%3D%22M20%2070%20Q30%2050%2040%2070%20T60%2070%20T80%2070%22%20stroke%3D%22%2310B981%22%20stroke-width%3D%223%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M15%2075%20Q25%2040%2035%2075%20T55%2075%20T75%2075%22%20stroke%3D%22%2306B6D4%22%20stroke-width%3D%222%22%20fill%3D%22none%22%2F%3E%3Ccircle%20cx%3D%2225%22%20cy%3D%2265%22%20r%3D%222%22%20fill%3D%22%23EF4444%22%2F%3E%3Ccircle%20cx%3D%2245%22%20cy%3D%2255%22%20r%3D%222%22%20fill%3D%22%23F59E0B%22%2F%3E%3Ccircle%20cx%3D%2265%22%20cy%3D%2260%22%20r%3D%222%22%20fill%3D%22%2310B981%22%2F%3E%3Cpath%20d%3D%22M20%2030%20L25%2025%20L30%2030%20L25%2035%20Z%22%20fill%3D%22%2306B6D4%22%2F%3E%3Cpath%20d%3D%22M70%2025%20L75%2020%20L80%2025%20L75%2030%20Z%22%20fill%3D%22%2310B981%22%2F%3E%3C%2Fsvg%3E">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="logo-icon"><path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="#E5E7EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M2 7L12 12" stroke="#E5E7EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 22V12" stroke="#E5E7EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M22 7L12 12" stroke="#E5E7EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M17 4.5L7 9.5" stroke="#E5E7EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                <h1>VibeLogger Dashboard</h1>
+            </div>
+            <div class="connection-status">
+                <span class="status-indicator connected"></span>
+                <span>Connected</span>
+            </div>
+            <div class="connection-switch">
+                <select id="connection-type">
+                    <option value="sse">SSE</option>
+                    <option value="ws">WebSocket</option>
+                </select>
+            </div>
+            <div class="log-stats">
+                <div class="stat-item">
+                    <span>Total:</span>
+                    <span id="total-logs">0</span>
+                </div>
+                <div class="stat-item errors">
+                    <span>Errors:</span>
+                    <span id="error-logs">0</span>
+                </div>
+                <div class="stat-item warnings">
+                    <span>Warnings:</span>
+                    <span id="warning-logs">0</span>
+                </div>
+            </div>
+        </header>
+
+        <aside class="sidebar">
+            <h2 class="sidebar-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 3H9V7H3V3ZM15 3H21V7H15V3ZM3 10H9V14H3V10ZM15 10H21V14H15V10ZM3 17H9V21H3V17ZM15 17H21V21H15V17Z" fill="currentColor"></path></svg>
+                <span>Projects</span>
+            </h2>
+            <div id="project-list" class="project-list">
+                <!-- Project items will be injected here by script.js -->
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="toolbar">
+                <div class="filter-controls">
+                    <select id="level-filter" aria-label="ログレベルでフィルター" title="表示するログレベルを選択">
+                        <option value="all">All Levels</option>
+                        <option value="error">Error</option>
+                        <option value="warning">Warning</option>
+                        <option value="info">Info</option>
+                        <option value="debug">Debug</option>
+                        <option value="success">Success</option>
+                    </select>
+                    <input type="text" id="operation-filter" placeholder="Filter by operation..." aria-label="操作でフィルター" title="特定の操作でログをフィルターします">
+                    <input type="text" id="search-filter" placeholder="Search logs... (Ctrl+F)" aria-label="ログを検索" title="ログ内容を検索します (Ctrl+F)">
+                </div>
+                <div class="action-buttons">
+                    <button id="auto-scroll-btn" class="btn-secondary active" aria-label="自動スクロールの切り替え" aria-pressed="true" title="自動スクロールを有効/無効にします">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 6V18M12 6L9 9M12 6L15 9M18 12H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(90 12 12)"></path><path d="M4 19H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+                        <span>Auto Scroll</span>
+                    </button>
+                    <button id="clear-btn" class="btn-danger" aria-label="ログをクリア" title="すべてのログを削除します (Ctrl+K)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        <span>Clear (Ctrl+K)</span>
+                    </button>
+                    <button id="export-btn" class="btn-primary" aria-label="ログをエクスポート" title="ログデータをファイルとしてエクスポートします (Ctrl+E)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 5V14M12 14L9 11M12 14L15 11M4 19H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        <span>Export (Ctrl+E)</span>
+                    </button>
+                </div>
+            </div>
+            <div class="log-view-header">
+                <span id="log-count-display">Showing 0 of 0 logs</span>
+            </div>
+            <div id="buffer-indicator" class="buffer-indicator" style="display: none;">
+                <span id="buffer-count">0</span> new logs available - scroll to top to view
+                <button id="scroll-to-top-btn" class="btn-small btn-primary">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 19V5M5 12L12 5L19 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Go to top
+                </button>
+            </div>
+            <div id="log-container" class="log-container">
+                <!-- Log cards will be injected here by script.js -->
+            </div>
+        </main>
+    </div>
+    <!-- タイムスタンプをつけて「キャッシュバスティング」します -->
+    <script>
+        document.write('<script src="script.js?v=' + Date.now() + '"><\/script>');
+    </script>
+</body>
+</html>
