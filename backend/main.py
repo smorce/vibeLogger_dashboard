@@ -5,8 +5,8 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import List, Set
 
-from fastapi import FastAPI, WebSocket, Request, WebSocketDisconnect
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi import FastAPI, WebSocket, Request, WebSocketDisconnect, HTTPException, status
+from fastapi.responses import HTMLResponse, FileResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 
 from starlette.responses import StreamingResponse
@@ -482,6 +482,45 @@ async def ingest_log(log: IncomingLog):
     await manager.broadcast(json.dumps(log_dict, ensure_ascii=False))
 
     return {"status": "ok"}
+
+
+@app.get("/api/logs/{project_name}/{file_name}", response_class=PlainTextResponse)
+async def get_log_file(project_name: str, file_name: str):
+    """
+    指定されたログファイルの中身を読み込んで返す。
+    セキュリティのため、ディレクトリトラバーサル攻撃を防ぐチェックを行う。
+    """
+    # セキュリティ: 不正な文字が含まれていないかチェック
+    if ".." in project_name or "/" in project_name or "\\" in project_name or \
+       ".." in file_name or "/" in file_name or "\\" in file_name:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid project or file name."
+        )
+
+    log_file_path = LOG_DIR / project_name / file_name
+
+    # セキュリティ: 解決後のパスがLOG_DIR配下にあることを確認
+    try:
+        resolved_path = log_file_path.resolve()
+        if not resolved_path.is_relative_to(LOG_DIR.resolve()):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden.")
+    except (FileNotFoundError, ValueError): # for non-existent or invalid paths
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Log file not found.")
+
+
+    if not resolved_path.is_file():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Log file not found.")
+
+    try:
+        content = await asyncio.to_thread(resolved_path.read_text, encoding="utf-8")
+        return PlainTextResponse(content=content)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to read log file: {e}"
+        )
+
 
 # --- Static Files (registered after all API routes) ---
 app.mount("/", StaticFiles(directory=FRONTEND_DIR), name="static")
