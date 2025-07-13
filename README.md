@@ -72,27 +72,27 @@ $ uv pip install -r requirements.txt
 
 ### 1. ダミーログあり（開発用）
 ```bash
-uv run vibeLogger_dashboard/backend/main.py
+uv run backend/main.py
 ```
 
 ### 2. ダミーログなし（本番・テスト用）
 ```bash
-uv run vibeLogger_dashboard/backend/main.py --no-dummy
+uv run backend/main.py --no-dummy
 ```
 
 #### 2-1. 外部からログ送信
 ```bash
-uv run vibeLogger_dashboard/tests/send_test_log.py
+uv run tests/send_test_log.py
 ```
 
 ### 3. テストモード（ログ生成のみ）
 ```bash
-uv run vibeLogger_dashboard/backend/main.py test
+uv run backend/main.py test
 ```
 
 ### 4. ヘルプ
 ```bash
-uv run vibeLogger_dashboard/backend/main.py --help
+uv run backend/main.py --help
 ```
 
 起動後、以下の URL にアクセスしてください。
@@ -183,7 +183,7 @@ ws.onmessage = e => console.log(JSON.parse(e.data));
 
 ## カスタマイズ
 
-1. **UI 変更**: `vibeLogger_dashboard/frontend/` 配下の `index.html`, `script.js`, `style.css` を編集。
+1. **UI 変更**: `frontend/` 配下の `index.html`, `script.js`, `style.css` を編集。
 2. **ログ構造拡張**: `LogEntry` 生成部分 (`backend/main.py` 内のロガー) で追加フィールドを付与。
 3. **ポート変更**: `--port` 引数で起動時に指定。
 4. **ダミーログ頻度**: `generate_logs()` 内の `await asyncio.sleep()` 間隔を変更。
