@@ -61,8 +61,11 @@ graph TD
 $ git clone https://github.com/smorce/vibeLogger_dashboard.git
 $ cd vibeLogger_dashboard
 
-# 2. 依存関係をインストール
-$ uv add -r requirements.txt
+# 2. 仮想環境を作成
+$ uv venv
+
+# 3. 依存関係をインストール
+$ uv pip install -r requirements.txt
 ```
 
 ## クイックスタート
